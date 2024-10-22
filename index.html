@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./dist/output.css" rel="stylesheet">
+</head>
+<body class="pl-10 pr-10">
+    <section id="banner" class="relative w-full h-64 overflow-hidden flex justify-center items-center">
+        <img src="463755865_122173332002238855_2405102300422326130_n.jpg" alt="Banner Image" class="w-full h-full object-cover">
+    </section>    
+    <section id="input form">
+        <h1 class="text-3xl font-bold text-center p-10">Product Dashboard</h1>
+        <form class="flex flex-col items-center space-y-4 mb-8">
+            <input
+                id="productname-input"
+                type="text"
+                placeholder="Product Name"
+                class="w-full max-w-md p-2 border border-gray-300 rounded-md shadow-sm"
+            />
+
+            <input
+                id="price-input"
+                type="number"
+                placeholder="Price"
+                class="w-full max-w-md p-2 border border-gray-300 rounded-md shadow-sm"
+            />
+
+            <input
+                id="url-input"
+                type="url"
+                placeholder="Image-URL"
+                class="w-full max-w-md p-2 border border-gray-300 rounded-md shadow-sm"
+            />
+
+            <button 
+            id="add-task-btn"
+            class="px-6 py-2 bg-blue-500 
+            text-white rounded-md hover:bg-blue-600 
+            transition duration-300">Create Product
+            </button>
+        </form>
+    </section>
+    
+    <section id="Dashboard" class="flex flex-col items-center space-y-4 mb-8">
+        <h1 class="text-3xl font-bold text-center p-10">Dashboard</h1>
+        <div class="flex flex-row gap-x-10 flex-wrap" id="product-list">
+        </div>
+        <button 
+        id="add-to-cart-btn"
+            class="px-6 py-2 bg-blue-500 
+            text-white rounded-md hover:bg-blue-600 
+            transition duration-300">Add to cart</button>
+    </section>
+
+    <section id="cart" class="w-full border border-gray-300 rounded-md shadow-sm pb-4 flex flex-col items-center">
+        <h1 class="text-3xl font-bold text-center p-2">Cart</h1>
+        <div class="flex flex-row gap-x-10 flex-wrap pb-10" id="cart-list"></div>
+        <div id="cart-summary" class="text-xl font-semibold mt-4 mb-4"></div> 
+        <button id="calculate-btn" class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300">Calculate</button>
+    </section>
+    <br>
+</body>
+
+<script>
+    const taskProductname = document.getElementById("productname-input");
+    const taskPrice = document.getElementById("price-input"); 
+    const taskUrl = document.getElementById("url-input");
+	const addTaskBtn = document.getElementById("add-task-btn");
+    const addToCartBtn = document.getElementById("add-to-cart-btn");
+    const cartList = document.getElementById('cart-list');
+    const cartSummary = document.getElementById('cart-summary');
+
+    let product = [
+        {
+            "Id":1,
+            "Productname":"Room Coffee",
+            "Price":"999",
+            "url":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6X7IuoOcJ9JmgiPJF9Utpfr0t7pv4yWaMBg&s"
+        },{
+            "Id":2,
+            "Productname":"Boom Collagen",
+            "Price":"899",
+            "url":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3LEPYp0ol0PoQ47d_ziCs2OiP_xpOZhYC6g&s"
+        },{
+            "Id":3,
+            "Productname":"Boom D-NAX",
+            "Price":"799",
+            "url":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5X-kHwRhyvvfXK52iPc1gnuVzYRvZpo1kdJPWiR4zCJehP-tczTd5zAuXf6AfX0tXxA4&usqp=CAU"
+        }
+    ]
+
+    let cart = [{
+            "Id":1,
+            "Productname":"Banana",
+            "Price":"44",
+            "url":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLWh-E-5rCitwZiTaKzesMB6kupUh0TRu1FQ&s"
+        }]
+    
+    function renderProducts() {
+        const productList = document.getElementById('product-list');
+        
+        productList.innerHTML = '';
+
+        product.forEach(item => {
+            const productCard = document.createElement('div');
+            productCard.classList.add('p-4', 'bg-white', 'rounded-lg', 'shadow-md', 'items-center');
+            
+            const productImg = document.createElement('img');
+            productImg.src = item.url;
+            productImg.alt = item.Productname;
+            productImg.classList.add('w-32', 'h-32', 'object-cover', 'mb-4');
+            productCard.appendChild(productImg);
+
+            const productName = document.createElement('h2');
+            productName.textContent = item.Productname;
+            productName.classList.add('text-xl', 'font-semibold');
+            productCard.appendChild(productName);
+
+            const productPrice = document.createElement('p');
+            productPrice.textContent = `$${item.Price}`;
+            productPrice.classList.add('text-gray-600');
+            productCard.appendChild(productPrice);
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.classList.add('mt-4', 'mr-2');
+            checkbox.id = `checkbox-${item.Id}`; // unique id for each checkbox
+            checkbox.value = item.Id;
+
+            const checkboxLabel = document.createElement('label');
+            checkboxLabel.htmlFor = checkbox.id;
+            checkboxLabel.textContent = 'Add to cart';
+            checkboxLabel.classList.add('cursor-pointer');
+
+            productCard.appendChild(checkbox);
+            productCard.appendChild(checkboxLabel);
+
+            productList.appendChild(productCard);
+        });
+    }
+
+    addTaskBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        const nproduct = taskProductname.value.trim();
+        const pproduct = taskPrice.value.trim();
+        const urlproduct = taskUrl.value;
+
+        if(nproduct.length === 0 || pproduct.length === 0){
+            alert('แล้วทำไมไม่ใส่ข้อมูลละครับ')
+            return;
+        }
+
+        let objarray = { "Productname": nproduct, "Price": pproduct, "url": urlproduct };
+        
+        product.push(objarray);
+
+        taskProductname.value = '';
+        taskPrice.value = '';
+        taskUrl.value = '';
+
+        renderProducts();
+        alert('สินค้าได้ถูกเพิ่มเรียบร้อยจ้า')
+    });
+    
+    function renderCart() {
+        cartList.innerHTML = '';
+
+        cart.forEach((item,index) => {
+            const cartItem = document.createElement('div');
+            cartItem.classList.add('flex', 'flex-col', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4');
+            
+            const cartImg = document.createElement('img');
+            cartImg.src = item.url;
+            cartImg.alt = item.Productname;
+            cartImg.classList.add('w-32', 'h-32', 'object-cover', 'mb-4');
+            cartItem.appendChild(cartImg);
+
+            const cartName = document.createElement('h2');
+            cartName.textContent = item.Productname;
+            cartName.classList.add('text-xl', 'font-semibold');
+            cartItem.appendChild(cartName);
+
+            const cartPrice = document.createElement('p');
+            cartPrice.textContent = `$${item.Price}`;
+            cartPrice.classList.add('text-gray-600');
+            cartItem.appendChild(cartPrice);
+
+            const cartRm = document.createElement('button');
+            cartRm.textContent = `remove`;
+            cartRm.classList.add('bg-red-500');
+            cartRm.classList.add('px-5')
+            cartRm.classList.add('text-white')
+            cartRm.classList.add('rounded-xl')
+            cartRm.classList.add('hover:bg-red-800')
+
+            cartRm.addEventListener('click', () => {
+                removeFromCart(index);
+            });
+            
+            cartItem.appendChild(cartRm);
+            cartList.appendChild(cartItem);
+        });
+    }
+
+    addToCartBtn.addEventListener("click", () => {
+        const checkboxes = document.querySelectorAll('#product-list input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                const productId = parseInt(checkbox.id.split('-')[1]);
+                const selectedProduct = product.find(item => item.Id === productId);
+                if (selectedProduct) {
+                    cart.push(selectedProduct);
+                }
+            }
+        });
+        renderCart();
+        alert('สินค้าในตะกร้าได้ถูกเพิ่มเรียบร้อยแล้วจ้า');
+    });
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        renderCart();
+        alert('Item has been removed from the cart.');
+    }
+
+    function updateCartSummary() {
+        const itemCount = cart.length;
+        const totalAmount = cart.reduce((total, item) => total + parseFloat(item.Price), 0); // Calculate total amount
+        cartSummary.textContent = `สินค้าทั้งหมด : ${itemCount} ชิ้น, ยอดรวม: $${totalAmount.toFixed(2)} บาท`; // Display summary
+    }
+
+    document.getElementById("calculate-btn").addEventListener("click", () => {
+        updateCartSummary(); 
+        alert('Total amount calculated successfully!');
+    });
+
+    renderProducts();
+    //renderCart();
+    console.log(product);
+</script>
+
+
+</html>
